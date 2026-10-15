@@ -1,6 +1,10 @@
 # AI Video Director Pipeline
 
-**Give it a song. Get a music video.** First lock the graphic DNA, then produce the posters and motion.
+**Every sound a deliberate decision. Every frame too.**
+
+Drop in a song. The pipeline reads its graphic DNA (palette, light, texture, motion), locks one character, and turns it into 20 posters and 20 cinematic clips that stay in the same world from first frame to last.
+
+Built by SERTAI LAB for independent artists who direct their own visuals.
 
 <p align="center">
   <a href="examples/echoes-led-head/"><img src="examples/echoes-led-head/poster.png" alt="Poster: Echoes, Destiny Poison (After Hours) EP" width="480"></a>
