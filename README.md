@@ -1,10 +1,11 @@
-# AI Video Director Pipeline
+# 🎬 Song-to-Clip: 20-Scene Cinematic Music Video Engine
 
-**Every sound a deliberate decision. Every frame too.**
+> Transform lyrics in any language into a complete 20-scene music video pipeline with locked character continuity.
 
-Drop in a song. The pipeline reads its graphic DNA (palette, light, texture, motion), locks one character, and turns it into 20 posters and 20 cinematic clips that stay in the same world from first frame to last.
-
-Built by SERTAI LAB for independent artists who direct their own visuals.
+[![Studio: SERTAI LAB](https://img.shields.io/badge/Studio-SERTAI%20LAB-black)](https://sertaiofficial.com)
+[![Website: sertaiofficial.com](https://img.shields.io/badge/Website-sertaiofficial.com-blue)](https://sertaiofficial.com)
+[![Target: Song-to-Video Continuity Pipeline](https://img.shields.io/badge/Target-Song--to--Video%20Continuity%20Pipeline-purple)](#concrete-pipeline-demo-destiny-poison-echoes)
+[![YouTube: @sertai.official](https://img.shields.io/badge/YouTube-%40sertai.official-red)](https://www.youtube.com/@sertai.official)
 
 <p align="center">
   <a href="examples/echoes-led-head/"><img src="examples/echoes-led-head/poster.png" alt="Poster: Echoes, Destiny Poison (After Hours) EP" width="480"></a>
@@ -12,6 +13,17 @@ Built by SERTAI LAB for independent artists who direct their own visuals.
 </p>
 
 <p align="center"><em>Echoes, Destiny Poison (After Hours) EP: poster and clip (<a href="examples/echoes-led-head/clip.mp4">full MP4</a>).</em></p>
+
+**Every sound a deliberate decision. Every frame too.** Drop in a song. The pipeline reads its graphic DNA (palette, light, texture, motion), locks one character, and turns it into 20 posters and 20 cinematic clips that stay in the same world from first frame to last. Built by SERTAI LAB for independent artists who direct their own visuals.
+
+## Concrete pipeline demo: Destiny Poison, Echoes
+
+| | |
+|---|---|
+| **Input** | Lyric segment and mood from *Echoes* (Destiny Poison (After Hours) EP) |
+| **Output 1** | High-res poster prompt (Midjourney / Banana Pro): [`poster_prompt.txt`](examples/echoes-led-head/poster_prompt.txt) |
+| **Output 2** | First-frame image-to-video motion prompt (Runway Gen-3 / Kling / Luma / Veo): [`video_prompt.txt`](examples/echoes-led-head/video_prompt.txt) |
+| **Result** | [`poster.png`](examples/echoes-led-head/poster.png) + [`clip.mp4`](examples/echoes-led-head/clip.mp4) |
 
 ## In 3 steps
 
