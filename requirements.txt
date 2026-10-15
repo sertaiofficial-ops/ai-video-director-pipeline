@@ -1,0 +1,3 @@
+# Python 3.10+
+requests>=2.31
+google-auth>=2.29   # only needed for the Vertex AI Veo route (Application Default Credentials)

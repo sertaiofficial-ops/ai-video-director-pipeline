@@ -1,0 +1,17 @@
+{
+  "source_dir": "./assets",
+  "output_dir": "./assets/banana_flow_automation",
+  "assets_dir": null,
+  "visual_prompts": "./assets/20_banana_pro_visual_prompts.md",
+  "video_prompts": "./assets/20_flow_omni_veo_fast_video_prompts.md",
+  "matrix": "./assets/prompt_set_matrix.md",
+  "guidelines": "./assets/flow_banana_prompt_guidelines.md",
+  "research": "./assets/character_consistency_research.md",
+  "guide": "./assets/banana_flow_automation_guide.md",
+  "project_name": "BananaPro_Flow_20_Prompt_Pack",
+  "duration": 8.0,
+  "aspect_ratio": "9:16",
+  "dry_run": false,
+  "package": true,
+  "created_at_utc": "2026-08-26T08:17:50.782323+00:00"
+}

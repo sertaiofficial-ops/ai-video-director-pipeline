@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+service-account*.json
+credentials*.json
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+output/
+assets/
+*.zip
+*.log
+*.wav
+*.mp3

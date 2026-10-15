@@ -1,0 +1,27 @@
+{
+  "config": {
+    "created_at_utc": "2026-08-26T08:36:43.224779+00:00",
+    "execute": false,
+    "dry_run": true,
+    "image_model": "gemini-3-pro-image",
+    "video_provider": "veo",
+    "video_model": null,
+    "aspect_ratio": "9:16",
+    "duration_seconds": 8,
+    "reference_images": [
+      "./assets/first_keyframe.png"
+    ],
+    "visual_prompt_chars": 0,
+    "video_prompt_chars": 843,
+    "external_calls": "disabled"
+  },
+  "status": "DRY_RUN",
+  "plan": {
+    "image": null,
+    "video": {
+      "adapter": "Vertex AI / Veo Fast",
+      "output": "./assets/google_flow_banana_dry_run_veo/video.mp4"
+    },
+    "next_step": "Add --execute for a real call and provide the required key/ADC credentials."
+  }
+}
