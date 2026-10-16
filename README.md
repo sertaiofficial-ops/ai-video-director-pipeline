@@ -2,6 +2,14 @@
 
 > Transform lyrics in any language into a complete 20-scene music video pipeline with locked character continuity.
 
+## Easiest way to use it (no API, no code)
+
+You don't need an API key, paid video model access or any coding.
+Open [`01-graphic-dna/skill/SKILL.md`](01-graphic-dna/skill/SKILL.md) (and [`02-motion-poster/skill/SKILL.md`](02-motion-poster/skill/SKILL.md) for the poster-to-clip step), copy the text and paste it into any AI chat assistant you already use.
+Attach a reference video or image and say "follow this".
+The assistant extracts the graphic DNA and writes the image and video prompts; paste those into whatever image or video generator you use.
+The API and ffmpeg steps further down are optional, for people who want automation.
+
 [![Studio: SERTAI LAB](https://img.shields.io/badge/Studio-SERTAI%20LAB-black)](https://sertaiofficial.com)
 [![Website: sertaiofficial.com](https://img.shields.io/badge/Website-sertaiofficial.com-blue)](https://sertaiofficial.com)
 [![Target: Song-to-Video Continuity Pipeline](https://img.shields.io/badge/Target-Song--to--Video%20Continuity%20Pipeline-purple)](#concrete-pipeline-demo-destiny-poison-echoes)
@@ -45,7 +53,7 @@
 | <img src="01-graphic-dna/references/character_premium.png" width="120"> | **01 · Graphic DNA** | Break the source down into palette, light, lens, texture and motion; lock one character identity used word for word in every prompt. | [`01-graphic-dna/`](01-graphic-dna/) |
 | <img src="02-motion-poster/keyframes/final_keyframe.png" width="120"> | **02 · Motion Poster** | Song-to-clip prompt → 20 visual + 20 video prompts → Banana Pro posters → Veo 3.1 Fast / Gemini Omni clips, or an ffmpeg motion poster when there is no video budget. | [`02-motion-poster/`](02-motion-poster/) |
 
-> Google Flow (Flow Lab) has **no public API**. The automation reaches the same models through the official **Gemini API** (Banana Pro image model, Gemini Omni video) and **Vertex AI** (Veo 3.1 Fast). Inside the Flow web app you can still use the prompts manually.
+> **Optional automation.** Everything above also works by hand with the prompts (see the no-API quick start at the top). Google Flow (Flow Lab) has no public API. The automation reaches the same models through the official **Gemini API** (Banana Pro image model, Gemini Omni video) and **Vertex AI** (Veo 3.1 Fast). Inside the Flow web app you can still use the prompts manually.
 
 ## Example / Demo: Destiny Poison, Echoes
 
@@ -59,7 +67,10 @@
 
 More: [`examples/rain-street/`](examples/rain-street/) (poster + 10 s clip) and dry-run outputs in [`examples/`](examples/).
 
-## Requirements
+## Requirements (optional, automation only)
+
+Only needed if you want to run the scripts. For the manual, no-API route you need none of this.
+
 
 - Python 3.10+, `ffmpeg` / `ffprobe` on PATH
 - `GEMINI_API_KEY` (or `GOOGLE_API_KEY`) for Banana Pro image and Gemini Omni video
