@@ -78,20 +78,20 @@ Write the report in this structure: title and status; executive summary; source 
 - Image/video/music prompt templates: `references/prompt-blueprints.md`
 - Character continuity and platform adapter recipe: `references/character-consistency.md`
 - Validation, edit and delivery checklist: `references/deliverable-checklist.md`
-- Technical media probe and contact sheet: `scripts/probe_media.sh`
-- Demo packaging: `scripts/package_demo.sh`
-- One-click deterministic motion poster automation: `scripts/run_motion_poster.py`
-- Banana Pro + Flow Lab 20+20 prompt validation/packaging automation: `scripts/run_banana_flow_prompt_pack.py`
-- Official Gemini/Vertex API adapter: `scripts/google_flow_banana_api.py`
+- Technical media probe and contact sheet: `02-motion-poster/src/probe_media.sh`
+- Demo packaging: `02-motion-poster/src/package_demo.sh`
+- One-click deterministic motion poster automation: `02-motion-poster/src/run_motion_poster.py`
+- Banana Pro + Flow Lab 20+20 prompt validation/packaging automation: `02-motion-poster/src/run_banana_flow_prompt_pack.py`
+- Official Gemini/Vertex API adapter: `02-motion-poster/src/google_flow_banana_api.py`
 
 ### Use the one-click automation
 
-Run deterministic local work with `scripts/run_motion_poster.py`: media probe, audio extraction, audio analysis script, V1/V2 motion poster render, source audio mux, `ffprobe` QC, manifest and ZIP packaging. Do not make image/video model calls automatically by guessing credentials; pass the generated first frame, final frame or real raw video file as explicit input.
+Run deterministic local work with `02-motion-poster/src/run_motion_poster.py`: media probe, audio extraction, audio analysis script, V1/V2 motion poster render, source audio mux, `ffprobe` QC, manifest and ZIP packaging. Do not make image/video model calls automatically by guessing credentials; pass the generated first frame, final frame or real raw video file as explicit input.
 
 Example V2 run:
 
 ```bash
-python3 scripts/run_motion_poster.py \
+python3 02-motion-poster/src/run_motion_poster.py \
   --source-audio /path/to/source.wav \
   --first-keyframe /path/to/first_keyframe.png \
   --final-keyframe /path/to/final_keyframe.png \
@@ -104,7 +104,7 @@ On the first run, verify the commands and expected output tree with `--dry-run`.
 To validate Banana Pro + Flow Lab prompt sets and produce copy-ready single prompt files and a ZIP:
 
 ```bash
-python3 scripts/run_banana_flow_prompt_pack.py \
+python3 02-motion-poster/src/run_banana_flow_prompt_pack.py \
   --source-dir /path/to/prompt-pack \
   --output-dir ./banana_flow_automation \
   --dry-run
@@ -117,7 +117,7 @@ If the dry-run succeeds, remove `--dry-run`. After the user has generated images
 `google_flow_banana_api.py` does not scrape the Flow Lab UI or imitate a user session. Instead it uses the documented developer surfaces as adapters: the Gemini Interactions API for Nano Banana Pro, the Gemini Interactions API for Gemini Omni Flash, and Vertex AI REST/ADC for Veo 3.1 Fast. Real generation calls run only with an explicit `--execute`; the default behavior is dry-run.
 
 ```bash
-python3 scripts/google_flow_banana_api.py \
+python3 02-motion-poster/src/google_flow_banana_api.py \
   --visual-prompt-file prompts/visual/M01.txt \
   --video-prompt-file prompts/video/M01.txt \
   --reference-image /path/to/character_anchor.png \

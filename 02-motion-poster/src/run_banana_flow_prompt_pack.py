@@ -90,6 +90,8 @@ def parse_args() -> Config:
     research = args.research or source_dir / RESEARCH_NAME
     if not research.exists():
         research = DOCS_DIR / RESEARCH_NAME
+    if not research.exists():
+        research = REPO_ROOT.parent / "01-graphic-dna" / "docs" / RESEARCH_NAME
     guide = args.guide or source_dir / GUIDE_NAME
     if not guide.exists():
         guide = DOCS_DIR / "prompt_pack_automation_guide.md"

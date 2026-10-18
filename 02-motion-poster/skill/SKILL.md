@@ -14,7 +14,7 @@ Use this skill to combine a Banana Pro image and an Omni/Veo video in one repeat
 1. **Identify the requested surface.** Use `gemini-3-pro-image` in the Gemini Interactions API for Nano Banana Pro images; `gemini-omni-flash-preview` in the Gemini Interactions API for fast image-to-video; and `veo-3.1-fast-generate-001` in Vertex AI for Cloud/ADC-based video. Read `references/google-api-research.md` for current model/endpoint information.
 2. **Explain the Flow Lab boundary.** If the user asks specifically about the Flow Lab UI, state that it is a creative web interface and that this skill is an official developer API adapter, not UI automation.
 3. **Validate inputs.** Accept the image prompt, video prompt and reference image as files. Keep 9:16, one main movement and the default 8 seconds; if the user gives different values, compare them with the documented model limits.
-4. **Run a dry-run first.** Call `scripts/google_flow_banana_api.py` with `--dry-run`; check the model, provider, aspect ratio, duration, references and output plan. Dry-run makes no network calls.
+4. **Run a dry-run first.** Call `src/google_flow_banana_api.py` with `--dry-run`; check the model, provider, aspect ratio, duration, references and output plan. Dry-run makes no network calls.
 5. **Obtain credentials at generation time.** Use `GEMINI_API_KEY` or `GOOGLE_API_KEY` for Gemini; use `GOOGLE_CLOUD_PROJECT`, a region and Application Default Credentials for Veo. Never write keys into files, prompts, logs, URLs or the command line.
 6. **Do not generate without an explicit execute.** Do not use `--execute` unless the user has explicitly approved the real call. Keep the stateless behavior when `--store` is not given; if server-side interaction history is wanted, explain this option deliberately.
 7. **Chain image to video.** Save the Banana Pro output as `banana_pro_image.png` and pass it to the video adapter as the starting frame. If the user supplied a ready frame, use `--skip-image`.
@@ -26,7 +26,7 @@ Use this skill to combine a Banana Pro image and an Omni/Veo video in one repeat
 Safe dry-run for Gemini Omni:
 
 ```bash
-python3 scripts/google_flow_banana_api.py \
+python3 src/google_flow_banana_api.py \
   --visual-prompt-file prompts/visual/M01.txt \
   --video-prompt-file prompts/video/M01.txt \
   --reference-image ./character_anchor.png \
@@ -38,7 +38,7 @@ python3 scripts/google_flow_banana_api.py \
 Veo dry-run with a ready frame:
 
 ```bash
-python3 scripts/google_flow_banana_api.py \
+python3 src/google_flow_banana_api.py \
   --skip-image \
   --reference-image ./starting_frame.png \
   --video-prompt-file prompts/video/M01.txt \
@@ -55,7 +55,7 @@ For a real Gemini call, provide the credential in the environment and then add `
 ## Resource routing
 
 - **API model, endpoint, credentials and limits:** read `references/google-api-integration.md` and `references/google-api-research.md`.
-- **API responses, polling and error behavior:** inspect the adapter classes in `scripts/google_flow_banana_api.py`; isolate model changes in the relevant adapter first.
+- **API responses, polling and error behavior:** inspect the adapter classes in `src/google_flow_banana_api.py`; isolate model changes in the relevant adapter first.
 - **Prompt and reference matching:** read `references/prompt-set-workflow.md`.
 - **12-section presentation script:** read `references/presentation-script-outline.md`; build the script as Cover + Slide 1… and give sources as numbered Markdown links.
 
