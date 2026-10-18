@@ -12,7 +12,7 @@ Second step: with the DNA locked, generate 20 sequenced poster prompts and 20 ma
 | [`prompts/`](prompts/) | Song-to-clip master prompt, 20 visual + 20 video prompts, prompt chain v1/v2, matrix, guidelines; `split/` = one file per ID |
 | [`src/`](src/) | Prompt pack runner, image → video API tool, motion poster renderer |
 | [`skill/`](skill/) | Google API (Gemini / Vertex AI) integration skill |
-| [`docs/`](docs/) | Clip plan, motion poster recipe, API research and integration guides |
+| [`docs/`](docs/) | Clip plan, motion poster recipe, API research, integration and production-reliability guides |
 | [`keyframes/`](keyframes/) | First / final keyframes for the fallback motion poster |
 
 ```bash
@@ -26,3 +26,15 @@ python3 src/run_motion_poster.py --source-audio assets/your_track.wav \
   --mode fallback --output-dir output/motion_poster --dry-run
 ```
 Every tool is dry-run first; real (paid) calls only with `--execute`. Keys go in `.env` (see `../.env.example`), never in the repo.
+
+## Production reliability
+
+Copy `config/project_config.example.json` to a project config and run the prompt pack validator with it:
+
+```bash
+bash src/run_banana_flow_prompt_pack.sh \
+  --project-config config/project_config.example.json \
+  --dry-run
+```
+
+For generated assets, add `--assets-dir assets`. The runner writes `asset_manifest.json`, validates ID-matched poster/video files with `ffprobe`, and records brand and rights metadata. See [`docs/production_reliability.md`](docs/production_reliability.md).

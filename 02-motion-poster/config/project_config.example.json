@@ -1,0 +1,31 @@
+{
+  "project_name": "SERTAI_Motion_Poster_Project",
+  "workflow_mode": "prompt_pack",
+  "scene_count": 20,
+  "duration_seconds": 8.0,
+  "aspect_ratio": "9:16",
+  "audio_mode": "source_only",
+  "video_provider": "omni",
+  "character_id": "[CHARACTER_ID]",
+  "identity_reference": "references/character_anchor.png",
+  "style_reference": "references/style_anchor.png",
+  "cue_map": [],
+  "brand": {
+    "enabled": true,
+    "text": "SERTAI LAB",
+    "position": "bottom-right-safe",
+    "opacity": 0.48
+  },
+  "rights": {
+    "status": "unknown",
+    "source_url": "",
+    "creator": "",
+    "permission_note": ""
+  },
+  "assets": {
+    "directory": "assets",
+    "require_complete_set": false,
+    "poster_pattern": "{id}_poster_9x16.png",
+    "video_pattern": "{id}_video_8s.mp4"
+  }
+}

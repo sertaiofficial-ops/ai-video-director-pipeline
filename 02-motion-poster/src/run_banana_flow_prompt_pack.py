@@ -7,6 +7,8 @@ The script automates deterministic preparation only:
 - verifies visual/video ID matching and common 9:16/8-second rules;
 - exports one copy-ready .txt file per prompt;
 - copies the matrix, guidelines, research and optional generated assets;
+- optionally reads a project config (brand, rights, asset policy) and runs
+  per-ID asset QC with ffprobe (PASS / PARTIAL / FAIL / SKIPPED);
 - writes validation/config/manifest files and creates a verified ZIP.
 
 It intentionally does not log in to, scrape, or call Banana Pro or Google Flow
@@ -20,6 +22,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 import zipfile
 from dataclasses import dataclass
@@ -53,6 +56,7 @@ class Config:
     source_dir: Path
     output_dir: Path
     assets_dir: Path | None
+    project_config: Path | None
     visual_prompts: Path
     video_prompts: Path
     matrix: Path
@@ -73,6 +77,7 @@ def parse_args() -> Config:
     parser.add_argument("--source-dir", type=Path, default=DEFAULT_SOURCE_DIR)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--assets-dir", type=Path, help="Optional folder of Banana Pro/Flow outputs")
+    parser.add_argument("--project-config", type=Path, help="Optional project_config.json with brand, rights and asset policy")
     parser.add_argument("--visual-prompts", type=Path)
     parser.add_argument("--video-prompts", type=Path)
     parser.add_argument("--matrix", type=Path)
@@ -99,6 +104,7 @@ def parse_args() -> Config:
         source_dir=source_dir,
         output_dir=args.output_dir.resolve(),
         assets_dir=args.assets_dir.resolve() if args.assets_dir else None,
+        project_config=args.project_config.resolve() if args.project_config else None,
         visual_prompts=(args.visual_prompts or source_dir / VISUAL_NAME).resolve(),
         video_prompts=(args.video_prompts or source_dir / VIDEO_NAME).resolve(),
         matrix=(args.matrix or source_dir / MATRIX_NAME).resolve(),
@@ -111,6 +117,19 @@ def parse_args() -> Config:
         dry_run=args.dry_run,
         package=not args.no_package,
     )
+
+
+def load_project_config(path: Path | None) -> dict[str, object]:
+    if path is None:
+        return {}
+    require_file(path, "Project config")
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise AutomationError(f"Project config is not valid JSON: {path}") from exc
+    if not isinstance(data, dict):
+        raise AutomationError("Project config root must be an object.")
+    return data
 
 
 def require_file(path: Path, label: str) -> None:
@@ -195,6 +214,19 @@ def validate_videos(entries: dict[str, dict[str, str]], visual_ids: set[str], du
     return errors
 
 
+def continuity_warnings(entries: dict[str, dict[str, str]]) -> list[str]:
+    warnings: list[str] = []
+    for item_id, entry in entries.items():
+        lower = entry["prompt"].lower()
+        if "preserve" not in lower or "same" not in lower:
+            warnings.append(f"Video {item_id}: add explicit same-reference continuity language.")
+        if "no new" not in lower and "no scene change" not in lower and "no location change" not in lower:
+            warnings.append(f"Video {item_id}: add an explicit single-location exclusion.")
+        if "audio:" not in lower and "ambient sound" not in lower:
+            warnings.append(f"Video {item_id}: add an explicit audio strategy.")
+    return warnings
+
+
 def write_json(path: Path, data: object) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -233,7 +265,86 @@ def copy_assets(assets_dir: Path | None, output_dir: Path) -> list[Path]:
     return copied
 
 
-def config_payload(cfg: Config) -> dict[str, object]:
+def probe_asset(path: Path) -> dict[str, object]:
+    if shutil.which("ffprobe") is None:
+        return {"path": str(path), "status": "UNVERIFIED", "reason": "ffprobe not found"}
+    cmd = ["ffprobe", "-v", "error", "-show_entries", "format=duration:stream=codec_type,width,height,codec_name",
+           "-of", "json", str(path)]
+    try:
+        result = subprocess.run(cmd, check=True, text=True, capture_output=True)
+        data = json.loads(result.stdout or "{}")
+        stream = next((item for item in data.get("streams", []) if item.get("codec_type") == "video"), None)
+        if stream is None:
+            return {"path": str(path), "status": "FAIL", "reason": "no image/video stream found"}
+        width, height = int(stream.get("width", 0) or 0), int(stream.get("height", 0) or 0)
+        ratio_ok = width > 0 and height > 0 and abs((width / height) - (9 / 16)) < 0.02
+        return {"path": str(path), "status": "PASS", "width": width, "height": height,
+                "codec": stream.get("codec_name"), "duration": data.get("format", {}).get("duration"),
+                "ratio_9x16": ratio_ok}
+    except (OSError, subprocess.CalledProcessError, json.JSONDecodeError) as exc:
+        return {"path": str(path), "status": "FAIL", "reason": str(exc)}
+
+
+IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
+VIDEO_SUFFIXES = {".mp4", ".mov", ".webm"}
+DURATION_TOLERANCE = 0.5
+
+
+def find_asset(assets: list[Path], item_id: str, suffixes: set[str], pattern: object) -> Path | None:
+    """Prefer the exact config pattern name, then any file named <ID>, <ID>_* or <ID>-*."""
+    if isinstance(pattern, str) and "{id}" in pattern:
+        expected = pattern.replace("{id}", item_id)
+        exact = next((p for p in assets if p.name == expected), None)
+        if exact is not None:
+            return exact
+    return next((p for p in assets
+                 if p.suffix.lower() in suffixes
+                 and (p.stem == item_id or p.stem.startswith(item_id + "_") or p.stem.startswith(item_id + "-"))), None)
+
+
+def validate_assets(assets_dir: Path | None, visual_ids: set[str], project_config: dict[str, object],
+                    target_duration: float | None = None) -> dict[str, object]:
+    result: dict[str, object] = {"status": "SKIPPED", "directory": str(assets_dir) if assets_dir else None, "items": {}}
+    if assets_dir is None:
+        return result
+    if not assets_dir.exists() or not assets_dir.is_dir():
+        raise AutomationError(f"Assets folder not found or not a directory: {assets_dir}")
+    assets = sorted(path for path in assets_dir.rglob("*") if path.is_file())
+    asset_policy = project_config.get("assets") if isinstance(project_config.get("assets"), dict) else {}
+    require_complete = bool(asset_policy.get("require_complete_set", False))
+    items: dict[str, object] = {}
+    failures: list[str] = []
+    missing: list[str] = []
+    for item_id in sorted(visual_ids):
+        image = find_asset(assets, item_id, IMAGE_SUFFIXES, asset_policy.get("poster_pattern"))
+        video = find_asset(assets, item_id, VIDEO_SUFFIXES, asset_policy.get("video_pattern"))
+        entry = {"poster": probe_asset(image) if image else {"status": "MISSING"},
+                 "video": probe_asset(video) if video else {"status": "MISSING"}}
+        video_duration = entry["video"].get("duration")
+        if video_duration is not None and target_duration:
+            try:
+                if abs(float(video_duration) - target_duration) > DURATION_TOLERANCE:
+                    entry["video"]["duration_warning"] = f"duration {float(video_duration):g}s differs from target {target_duration:g}s"
+            except (TypeError, ValueError):
+                pass
+        items[item_id] = entry
+        if require_complete and (image is None or video is None):
+            failures.append(f"{item_id}: missing poster or video")
+        elif image is None or video is None:
+            missing.append(f"{item_id}: missing poster or video")
+        for role in ("poster", "video"):
+            if entry[role].get("status") == "FAIL":
+                failures.append(f"{item_id}: unreadable {role}")
+            if entry[role].get("ratio_9x16") is False:
+                failures.append(f"{item_id}: {role} is not 9:16")
+    result["items"] = items
+    result["status"] = "FAIL" if failures else ("PARTIAL" if missing else "PASS")
+    result["errors"] = failures
+    result["missing"] = missing
+    return result
+
+
+def config_payload(cfg: Config, project_config: dict[str, object], asset_qc: dict[str, object]) -> dict[str, object]:
     return {
         "source_dir": str(cfg.source_dir),
         "output_dir": str(cfg.output_dir),
@@ -249,6 +360,8 @@ def config_payload(cfg: Config) -> dict[str, object]:
         "aspect_ratio": cfg.aspect_ratio,
         "dry_run": cfg.dry_run,
         "package": cfg.package,
+        "project_config": project_config,
+        "asset_qc": asset_qc,
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -265,6 +378,7 @@ def write_manifest(output_dir: Path, cfg: Config, validation: dict[str, object],
         f"- Target duration: {cfg.duration:g} seconds",
         f"- Target aspect ratio: {cfg.aspect_ratio}",
         f"- Validation: {validation['status']}",
+        f"- Asset QC: {validation.get('asset_qc_status', 'SKIPPED')}",
         "",
         "## Files",
         "",
@@ -289,6 +403,26 @@ def package_output(output_dir: Path, archive: Path) -> None:
 
 def main() -> int:
     cfg = parse_args()
+    project_config = load_project_config(cfg.project_config)
+    if isinstance(project_config.get("brand"), dict):
+        brand = project_config["brand"]
+        if brand.get("text") and len(str(brand["text"])) > 80:
+            raise AutomationError("brand.text must be 80 characters or fewer.")
+        opacity = brand.get("opacity")
+        if opacity is not None and (isinstance(opacity, bool) or not isinstance(opacity, (int, float)) or not 0 <= opacity <= 1):
+            raise AutomationError("brand.opacity must be a number between 0 and 1.")
+    rights = project_config.get("rights")
+    if isinstance(rights, dict) and rights.get("status") not in {None, "unknown", "cleared", "user-approved", "restricted"}:
+        raise AutomationError("rights.status must be unknown, cleared, user-approved or restricted.")
+    config_warnings: list[str] = []
+    if cfg.research is None:
+        config_warnings.append(f"Character research file ({RESEARCH_NAME}) not found in the source dir, docs/ or 01-graphic-dna/docs/; package will not include it.")
+    if isinstance(rights, dict) and rights.get("status") in {None, "unknown"}:
+        config_warnings.append("rights.status is unknown: draft use only; set cleared or user-approved before publishing.")
+    if isinstance(rights, dict) and rights.get("status") == "restricted":
+        config_warnings.append("rights.status is restricted: do not publish without a new permission check.")
+    for message in config_warnings:
+        print(f"WARNING: {message}", file=sys.stderr)
     for path, label in (
         (cfg.visual_prompts, "Visual prompt file"),
         (cfg.video_prompts, "Video prompt file"),
@@ -310,13 +444,25 @@ def main() -> int:
     errors.extend(validate_common(videos, "Video", cfg.duration, cfg.aspect_ratio))
     errors.extend(validate_visuals(visuals))
     errors.extend(validate_videos(videos, set(visuals), cfg.duration))
+    warnings = config_warnings + continuity_warnings(videos)
+    asset_qc = validate_assets(cfg.assets_dir, set(visuals), project_config, cfg.duration)
+    if asset_qc["status"] == "FAIL":
+        errors.extend(asset_qc.get("errors", []))
+    for item_id, entry in (asset_qc.get("items") or {}).items():
+        note = entry["video"].get("duration_warning")
+        if note:
+            warnings.append(f"Asset {item_id}: video {note}.")
+    if asset_qc["status"] == "PARTIAL":
+        warnings.append(f"Asset QC PARTIAL: {len(asset_qc.get('missing', []))} ID(s) missing a poster or video.")
     validation = {
         "status": "PASS" if not errors else "FAIL",
         "visual_count": len(visuals),
         "video_count": len(videos),
         "category_counts": {category: sum(item_id.startswith(category) for item_id in visuals) for category in EXPECTED_CATEGORIES},
         "matched_ids": set(visuals) == set(videos),
+        "asset_qc_status": asset_qc["status"],
         "errors": errors,
+        "warnings": warnings,
     }
     cfg.output_dir.mkdir(parents=True, exist_ok=True)
     write_json(cfg.output_dir / "validation.json", validation)
@@ -324,7 +470,7 @@ def main() -> int:
         raise AutomationError("Prompt validation failed: " + " | ".join(errors))
 
     if cfg.dry_run:
-        write_json(cfg.output_dir / "run_config.json", {**config_payload(cfg), "planned_outputs": ["validation.json", "run_config.json", "DELIVERY_MANIFEST.md", "prompt_pack.zip"]})
+        write_json(cfg.output_dir / "run_config.json", {**config_payload(cfg, project_config, asset_qc), "planned_outputs": ["validation.json", "run_config.json", "asset_manifest.json", "DELIVERY_MANIFEST.md", "prompt_pack.zip"]})
         print(json.dumps(validation, ensure_ascii=False, indent=2))
         print(f"DRY RUN PASS — {cfg.output_dir}")
         return 0
@@ -338,8 +484,10 @@ def main() -> int:
             output_files.append(copied)
     output_files.extend(copy_assets(cfg.assets_dir, cfg.output_dir))
     config_path = cfg.output_dir / "run_config.json"
-    write_json(config_path, config_payload(cfg))
-    output_files.extend([cfg.output_dir / "validation.json", config_path])
+    write_json(config_path, config_payload(cfg, project_config, asset_qc))
+    asset_manifest = cfg.output_dir / "asset_manifest.json"
+    write_json(asset_manifest, asset_qc)
+    output_files.extend([cfg.output_dir / "validation.json", config_path, asset_manifest])
     manifest = write_manifest(cfg.output_dir, cfg, validation, output_files)
     output_files.append(manifest)
 
