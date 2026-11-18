@@ -2,7 +2,7 @@
 
 Copy everything inside the block into any capable LLM. Fill in the bracketed fields first. The output is a clip treatment, one locked character and N scene-matched image + video prompt pairs, each tied to the lyric line it is sung on.
 
-Rules it enforces come from this repo: one fixed identity anchor repeated word for word, one shared negative block, one controlled variable per shot, matching IDs between image and video prompts. See [`20_prompt_chain_character_consistency_v2.md`](20_prompt_chain_character_consistency_v2.md) for the full chain and [`../../examples/destiny-poison-echoes/`](../examples/destiny-poison-echoes/) for a worked example.
+Rules it enforces come from this repo: one fixed identity anchor repeated word for word, one shared negative block, one controlled variable per shot, matching IDs between image and video prompts. See [`20_prompt_chain_character_consistency_v2.md`](20_prompt_chain_character_consistency_v2.md) for the full chain and [`../../examples/destiny-poison-echoes/`](../../examples/destiny-poison-echoes/) for a worked example.
 
 ```text
 You are a continuity-first music video director. Turn the song below into a vertical 9:16 clip plan for AI image and image-to-video generation.
