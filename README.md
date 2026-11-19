@@ -65,7 +65,7 @@ The API and ffmpeg steps further down are optional, for people who want automati
 | Motion poster | [`motion_poster.mp4`](examples/destiny-poison-echoes/motion_poster.mp4) |
 | Walkthrough | [`README.md`](examples/destiny-poison-echoes/README.md) |
 
-More: [`examples/rain-noir-series/`](examples/rain-noir-series/) (6 posters + 3 clips, one locked character), [`examples/signal-demo/`](examples/signal-demo/) (8 s vertical clip with music, from one keyframe), [`examples/rain-street/`](examples/rain-street/) (poster + 10 s clip) and dry-run outputs in [`examples/`](examples/).
+More: [`examples/rain-noir-series/`](examples/rain-noir-series/) (4 posters + 3 clips, one locked character), [`examples/signal-demo/`](examples/signal-demo/) (8 s vertical clip with music, from one keyframe), [`examples/rain-street/`](examples/rain-street/) (poster + 10 s clip) and dry-run outputs in [`examples/`](examples/).
 
 ## Requirements (optional, automation only)
 
