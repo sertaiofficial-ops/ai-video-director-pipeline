@@ -65,7 +65,7 @@ The API and ffmpeg steps further down are optional, for people who want automati
 | Motion poster | [`motion_poster.mp4`](examples/destiny-poison-echoes/motion_poster.mp4) |
 | Walkthrough | [`README.md`](examples/destiny-poison-echoes/README.md) |
 
-More: [`examples/rain-noir-series/`](examples/rain-noir-series/) (4 posters + 3 clips, one locked character), [`examples/signal-demo/`](examples/signal-demo/) (8 s vertical clip with music, from one keyframe), [`examples/rain-street/`](examples/rain-street/) (poster + 10 s clip) and dry-run outputs in [`examples/`](examples/).
+More: [`examples/rain-noir-series/`](examples/rain-noir-series/) (4 posters + 3 clips, one locked character), [`examples/signal-demo/`](examples/signal-demo/) (8 s vertical clip with music, from one keyframe), [`examples/mira/`](examples/mira/) (locked female character: reference card + continuity shots), [`examples/rain-street/`](examples/rain-street/) (poster + 10 s clip) and dry-run outputs in [`examples/`](examples/).
 
 ## Requirements (optional, automation only)
 
@@ -88,7 +88,7 @@ cp .env.example .env   # your own values, never commit .env
 ```
 01-graphic-dna/     skill, DNA findings, character consistency research, reference images
 02-motion-poster/   prompts (20+20, chain, split), src (automation), API skill, docs, keyframes
-examples/           Echoes (poster, motion poster, prompts), Rain Noir series, Signal demo, Rain Street, dry-run JSON
+examples/           Echoes (poster, motion poster, prompts), Rain Noir series, Signal demo, MIRA, Rain Street, dry-run JSON
 ```
 
 ---
