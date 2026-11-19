@@ -18,13 +18,4 @@ One locked character, one world: four posters and three animated clips from the 
 | <img src="posters/poster_01.jpg" width="220" alt="Poster 01: rain street, wide"> | <img src="posters/poster_02.jpg" width="220" alt="Poster 02: leaning on the railing"> |
 | <img src="posters/poster_03.jpg" width="220" alt="Poster 03: standing in mist"> | <img src="posters/poster_04.jpg" width="220" alt="Poster 04: closing fist in rain"> |
 
-## Alternates (kept apart)
-
-These two frames drift from the locked character (face and styling don't match the rest of the series), so they are kept out of the main set as a reference for what continuity drift looks like.
-
-| Red backdrop close-up | Under the street lamp |
-|---|---|
-| <img src="alternates/alt_red_closeup.jpg" width="220" alt="Alternate: red backdrop close-up"> | <img src="alternates/alt_street_lamp.jpg" width="220" alt="Alternate: under the street lamp"> |
-
-
 Made with the flow in [START_HERE.md](../../START_HERE.md): lock the DNA, write the poster prompts, animate the posters.
