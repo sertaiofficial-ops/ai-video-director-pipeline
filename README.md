@@ -65,7 +65,7 @@ The API and ffmpeg steps further down are optional, for people who want automati
 | Motion poster | [`motion_poster.mp4`](examples/destiny-poison-echoes/motion_poster.mp4) |
 | Walkthrough | [`README.md`](examples/destiny-poison-echoes/README.md) |
 
-More: [`examples/rain-street/`](examples/rain-street/) (poster + 10 s clip) and dry-run outputs in [`examples/`](examples/).
+More: [`examples/rain-noir-series/`](examples/rain-noir-series/) (6 posters + 3 clips, one locked character), [`examples/rain-street/`](examples/rain-street/) (poster + 10 s clip) and dry-run outputs in [`examples/`](examples/).
 
 ## Requirements (optional, automation only)
 
@@ -88,7 +88,7 @@ cp .env.example .env   # your own values, never commit .env
 ```
 01-graphic-dna/     skill, DNA findings, character consistency research, reference images
 02-motion-poster/   prompts (20+20, chain, split), src (automation), API skill, docs, keyframes
-examples/           Echoes (poster, motion poster, prompts), Rain Street, dry-run JSON
+examples/           Echoes (poster, motion poster, prompts), Rain Noir series, Rain Street, dry-run JSON
 ```
 
 ---
